@@ -1,6 +1,6 @@
 CONFIGURATION = "Release"
 BUILD_SDK_VERSION = ENV['BUILD_SDK_VERSION'] || ""
-SIMULATOR_VERSIONS = ENV['SIMULATOR_VERSIONS'] || "9.0"
+SIMULATOR_VERSIONS = ENV['SIMULATOR_VERSIONS'] || "9.2"
 SIMULATOR_DEVICES = ENV['SIMULATOR_DEVICES'] || "iPhone 5s"
 BUILD_DIR = File.join(File.dirname(__FILE__), "build")
 
@@ -45,21 +45,13 @@ def output_file(target)
 end
 
 def build_and_test_scheme(scheme)
-  sdk = 'iphonesimulator' + BUILD_SDK_VERSION
   devices = SIMULATOR_DEVICES.split(",")
   versions = SIMULATOR_VERSIONS.split(",")
-  system_or_exit(
-    %Q[xcodebuild -workspace PivotalCoreKit.xcworkspace \
-      -scheme #{scheme} \
-      -sdk #{sdk} \
-      build]
-  )
+  sdk = 'iphonesimulator' + BUILD_SDK_VERSION
 
   devices.each do |device|
-
     retry_count = 0
     versions.each do |version|
-
       begin
         puts "Testing #{scheme} on device: #{device} version: #{version}"
         puts "Killing the simulator first"
@@ -69,6 +61,7 @@ def build_and_test_scheme(scheme)
             -scheme #{scheme} \
             -sdk #{sdk} \
             -destination platform='iOS Simulator',name='#{device},OS=#{version}' \
+            build \
             test]
         )
       rescue
@@ -76,7 +69,7 @@ def build_and_test_scheme(scheme)
 
         if retry_count == 3
           raise
-        else 
+        else
           retry
         end
       end
